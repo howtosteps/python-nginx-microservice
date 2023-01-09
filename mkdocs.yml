@@ -1,1 +1,5 @@
 site_name: My Docs
+site_url: https://howtosteps.github.io/python-nginx-microservice/site/
+nav:
+  - Home: index.md
+theme: readthedocs
