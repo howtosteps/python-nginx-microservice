@@ -4,6 +4,10 @@ import requests
 
 app = Flask(__name__)
 api = Api(app)
+@app.route('/')
+def index():
+    res="Access master services as follows: http://localhost/news?country=gr or http://localhost/weather?city=amsterdam"
+    return res
 @app.route('/weather')
 def weather():
     city = request.args.get('city')
