@@ -1,0 +1,212 @@
+<!DOCTYPE html>
+<html class="writer-html5" lang="en" >
+<head>
+    <meta charset="utf-8" />
+    <meta http-equiv="X-UA-Compatible" content="IE=edge" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0" /><link rel="canonical" href="https://howtosteps.github.io/python-nginx-microservice/site/create-weather-service/" />
+      <link rel="shortcut icon" href="../img/favicon.ico" />
+    <title>Create weather service - Simple microservices example</title>
+    <link rel="stylesheet" href="../css/theme.css" />
+    <link rel="stylesheet" href="../css/theme_extra.css" />
+        <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/highlight.js/10.5.0/styles/github.min.css" />
+    
+      <script>
+        // Current page data
+        var mkdocs_page_name = "Create weather service";
+        var mkdocs_page_input_path = "create-weather-service.md";
+        var mkdocs_page_url = "/python-nginx-microservice/site/create-weather-service/";
+      </script>
+    
+    <script src="../js/jquery-3.6.0.min.js" defer></script>
+    <!--[if lt IE 9]>
+      <script src="../js/html5shiv.min.js"></script>
+    <![endif]-->
+      <script src="https://cdnjs.cloudflare.com/ajax/libs/highlight.js/10.5.0/highlight.min.js"></script>
+      <script>hljs.initHighlightingOnLoad();</script> 
+</head>
+
+<body class="wy-body-for-nav" role="document">
+
+  <div class="wy-grid-for-nav">
+    <nav data-toggle="wy-nav-shift" class="wy-nav-side stickynav">
+    <div class="wy-side-scroll">
+      <div class="wy-side-nav-search">
+          <a href=".." class="icon icon-home"> Simple microservices example
+        </a><div role="search">
+  <form id ="rtd-search-form" class="wy-form" action="../search.html" method="get">
+      <input type="text" name="q" placeholder="Search docs" title="Type search term here" />
+  </form>
+</div>
+      </div>
+
+      <div class="wy-menu wy-menu-vertical" data-spy="affix" role="navigation" aria-label="Navigation menu">
+              <ul>
+                <li class="toctree-l1"><a class="reference internal" href="..">Home</a>
+                </li>
+              </ul>
+              <ul>
+                <li class="toctree-l1"><a class="reference internal" href="../create-news-service/">Create news service</a>
+                </li>
+              </ul>
+              <ul class="current">
+                <li class="toctree-l1 current"><a class="reference internal current" href="./">Create weather service</a>
+    <ul class="current">
+    <li class="toctree-l2"><a class="reference internal" href="#sample-requestresponse">Sample request/response</a>
+    </li>
+    <li class="toctree-l2"><a class="reference internal" href="#create-weather-service_1">Create weather service</a>
+    </li>
+    <li class="toctree-l2"><a class="reference internal" href="#create-dockerfile">Create Dockerfile</a>
+    </li>
+    </ul>
+                </li>
+              </ul>
+              <ul>
+                <li class="toctree-l1"><a class="reference internal" href="../create-master-app/">Create master app</a>
+                </li>
+              </ul>
+              <ul>
+                <li class="toctree-l1"><a class="reference internal" href="../create-nginx-loadbalancer/">Create ngix loadbalancer</a>
+                </li>
+              </ul>
+              <ul>
+                <li class="toctree-l1"><a class="reference internal" href="../create-docker-compose/">Define docker compose</a>
+                </li>
+              </ul>
+              <ul>
+                <li class="toctree-l1"><a class="reference internal" href="../build-and-run-app/">Build and run app</a>
+                </li>
+              </ul>
+              <ul>
+                <li class="toctree-l1"><a class="reference internal" href="../clean-up/">Clean up</a>
+                </li>
+              </ul>
+      </div>
+    </div>
+    </nav>
+
+    <section data-toggle="wy-nav-shift" class="wy-nav-content-wrap">
+      <nav class="wy-nav-top" role="navigation" aria-label="Mobile navigation menu">
+          <i data-toggle="wy-nav-top" class="fa fa-bars"></i>
+          <a href="..">Simple microservices example</a>
+        
+      </nav>
+      <div class="wy-nav-content">
+        <div class="rst-content"><div role="navigation" aria-label="breadcrumbs navigation">
+  <ul class="wy-breadcrumbs">
+    <li><a href=".." class="icon icon-home" alt="Docs"></a> &raquo;</li>
+      <li>Create weather service</li>
+    <li class="wy-breadcrumbs-aside">
+    </li>
+  </ul>
+  <hr/>
+</div>
+          <div role="main" class="document" itemscope="itemscope" itemtype="http://schema.org/Article">
+            <div class="section" itemprop="articleBody">
+              
+                <h1 id="create-weather-service">Create Weather Service</h1>
+<p>Now we will create the weather service app. The news service app is also based of Flask API and simply calls the  <a href="https://openweathermap.org/api">WeatherAPI</a>. The weather service app will be configured on port:3002 </p>
+<h2 id="sample-requestresponse">Sample request/response</h2>
+<p>A request involves 2 attributes :
+* appid : This is the 2 letter code for the country
+* q : Represents the city name</p>
+<p>Sample request/response will look like this:
+* Sample request for the weather in New York city</p>
+<pre><code>PS C:\Users\aniru\workspace\github\nginx-docker&gt; curl https://api.openweathermap.org/data/2.5/weather?appid=deb96cff96df7c74e93e62661b91c3c2'&amp;'q=new%20york
+</code></pre>
+<ul>
+<li>Sample response for the above request :  </li>
+</ul>
+<pre><code>{&quot;coord&quot;:{&quot;lon&quot;:-74.006,&quot;lat&quot;:40.7143},&quot;weather&quot;:[{&quot;id&quot;:804,&quot;main&quot;:&quot;Clouds&quot;,&quot;description&quot;:&quot;overcast clouds&quot;,&quot;icon&quot;:&quot;04n&quot;}],&quot;base&quot;:&quot;stations&quot;,&quot;main&quot;:{&quot;temp&quot;:279.94,&quot;feels_like&quot;:276.89,&quot;temp_min&quot;:277.88,&quot;temp_max&quot;:281.12,&quot;pressure&quot;:1005,&quot;humidity&quot;:53},&quot;visibility&quot;:10000,&quot;wind&quot;:{&quot;speed&quot;:4.63,&quot;deg&quot;:230},&quot;clouds&quot;:{&quot;all&quot;:100},&quot;dt&quot;:1674012646,&quot;sys&quot;:{&quot;type&quot;:2,&quot;id&quot;:2008101,&quot;country&quot;:&quot;US&quot;,&quot;sunrise&quot;:1673957823,&quot;sunset&quot;:1673992477},&quot;timezone&quot;:-18000,&quot;id&quot;:5128581,&quot;name&quot;:&quot;New York&quot;,&quot;cod&quot;:200}
+</code></pre>
+<h2 id="create-weather-service_1">Create weather service</h2>
+<p>Create file <code>weather.py</code> and copy the following contents :</p>
+<pre><code>from flask import Flask, request
+from flask_restful import Api
+import json
+import requests
+
+app = Flask(__name__)
+api = Api(app)
+@app.route('/weather')
+def weather():
+    # sample request: http://api.openweathermap.org/data/2.5/weather?appid=deb96cff96df7c74e93e62661b91c3c2&amp;q=new%20york
+    city_name = request.args.get('city')
+    api_key = &quot;deb96cff96df7c74e93e62661b91c3c2&quot;
+    base_url = &quot;http://api.openweathermap.org/data/2.5/weather?&quot;
+    complete_url = base_url + &quot;appid=&quot; + api_key + &quot;&amp;q=&quot; + city_name
+    response = requests.get(complete_url)
+    return response.json()
+
+if __name__ == '__main__':
+    app.run(host=&quot;0.0.0.0&quot;,port='3002',threaded=True,debug=True)
+</code></pre>
+<p>This tells weather app to parse any incoming request and pass on the request to the OpenWeather API. The app returns the response returned by the weather API as is. </p>
+<h2 id="create-dockerfile">Create Dockerfile</h2>
+<p>We will create a new dockerfile called <code>Dockerfile.weather</code>. This will be referenced in the <code>docker-compose.yml</code> file. Copy the following contents into <code>Dockerfile.weather</code>.</p>
+<pre><code># use Python 3.11 image
+FROM python:3.11-alpine
+
+# install dependencies:
+COPY requirements.txt .
+RUN pip install -r requirements.txt
+EXPOSE 3002
+COPY weather.py .
+
+# run the application:
+CMD [&quot;python&quot;, &quot;weather.py&quot;]
+</code></pre>
+<p>This will tell docker to:</p>
+<ul>
+<li>Use python base image 3.11-alpine </li>
+<li>Reference <code>requirements.txt</code> in the image to install required software </li>
+<li>Expose port 3002</li>
+<li>Copy <code>news.py</code> to the image</li>
+<li>Start the weather service</li>
+</ul>
+              
+            </div>
+          </div><footer>
+    <div class="rst-footer-buttons" role="navigation" aria-label="Footer Navigation">
+        <a href="../create-news-service/" class="btn btn-neutral float-left" title="Create news service"><span class="icon icon-circle-arrow-left"></span> Previous</a>
+        <a href="../create-master-app/" class="btn btn-neutral float-right" title="Create master app">Next <span class="icon icon-circle-arrow-right"></span></a>
+    </div>
+
+  <hr/>
+
+  <div role="contentinfo">
+    <!-- Copyright etc -->
+  </div>
+
+  Built with <a href="https://www.mkdocs.org/">MkDocs</a> using a <a href="https://github.com/readthedocs/sphinx_rtd_theme">theme</a> provided by <a href="https://readthedocs.org">Read the Docs</a>.
+</footer>
+          
+        </div>
+      </div>
+
+    </section>
+
+  </div>
+
+  <div class="rst-versions" role="note" aria-label="Versions">
+  <span class="rst-current-version" data-toggle="rst-current-version">
+    
+    
+      <span><a href="../create-news-service/" style="color: #fcfcfc">&laquo; Previous</a></span>
+    
+    
+      <span><a href="../create-master-app/" style="color: #fcfcfc">Next &raquo;</a></span>
+    
+  </span>
+</div>
+    <script>var base_url = '..';</script>
+    <script src="../js/theme_extra.js" defer></script>
+    <script src="../js/theme.js" defer></script>
+      <script src="../search/main.js" defer></script>
+    <script defer>
+        window.onload = function () {
+            SphinxRtdTheme.Navigation.enable(true);
+        };
+    </script>
+
+</body>
+</html>

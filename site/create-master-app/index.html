@@ -1,0 +1,215 @@
+<!DOCTYPE html>
+<html class="writer-html5" lang="en" >
+<head>
+    <meta charset="utf-8" />
+    <meta http-equiv="X-UA-Compatible" content="IE=edge" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0" /><link rel="canonical" href="https://howtosteps.github.io/python-nginx-microservice/site/create-master-app/" />
+      <link rel="shortcut icon" href="../img/favicon.ico" />
+    <title>Create master app - Simple microservices example</title>
+    <link rel="stylesheet" href="../css/theme.css" />
+    <link rel="stylesheet" href="../css/theme_extra.css" />
+        <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/highlight.js/10.5.0/styles/github.min.css" />
+    
+      <script>
+        // Current page data
+        var mkdocs_page_name = "Create master app";
+        var mkdocs_page_input_path = "create-master-app.md";
+        var mkdocs_page_url = "/python-nginx-microservice/site/create-master-app/";
+      </script>
+    
+    <script src="../js/jquery-3.6.0.min.js" defer></script>
+    <!--[if lt IE 9]>
+      <script src="../js/html5shiv.min.js"></script>
+    <![endif]-->
+      <script src="https://cdnjs.cloudflare.com/ajax/libs/highlight.js/10.5.0/highlight.min.js"></script>
+      <script>hljs.initHighlightingOnLoad();</script> 
+</head>
+
+<body class="wy-body-for-nav" role="document">
+
+  <div class="wy-grid-for-nav">
+    <nav data-toggle="wy-nav-shift" class="wy-nav-side stickynav">
+    <div class="wy-side-scroll">
+      <div class="wy-side-nav-search">
+          <a href=".." class="icon icon-home"> Simple microservices example
+        </a><div role="search">
+  <form id ="rtd-search-form" class="wy-form" action="../search.html" method="get">
+      <input type="text" name="q" placeholder="Search docs" title="Type search term here" />
+  </form>
+</div>
+      </div>
+
+      <div class="wy-menu wy-menu-vertical" data-spy="affix" role="navigation" aria-label="Navigation menu">
+              <ul>
+                <li class="toctree-l1"><a class="reference internal" href="..">Home</a>
+                </li>
+              </ul>
+              <ul>
+                <li class="toctree-l1"><a class="reference internal" href="../create-news-service/">Create news service</a>
+                </li>
+              </ul>
+              <ul>
+                <li class="toctree-l1"><a class="reference internal" href="../create-weather-service/">Create weather service</a>
+                </li>
+              </ul>
+              <ul class="current">
+                <li class="toctree-l1 current"><a class="reference internal current" href="./">Create master app</a>
+    <ul class="current">
+    <li class="toctree-l2"><a class="reference internal" href="#create-master-service">Create master service</a>
+    </li>
+    <li class="toctree-l2"><a class="reference internal" href="#create-dockerfile">Create Dockerfile</a>
+    </li>
+    </ul>
+                </li>
+              </ul>
+              <ul>
+                <li class="toctree-l1"><a class="reference internal" href="../create-nginx-loadbalancer/">Create ngix loadbalancer</a>
+                </li>
+              </ul>
+              <ul>
+                <li class="toctree-l1"><a class="reference internal" href="../create-docker-compose/">Define docker compose</a>
+                </li>
+              </ul>
+              <ul>
+                <li class="toctree-l1"><a class="reference internal" href="../build-and-run-app/">Build and run app</a>
+                </li>
+              </ul>
+              <ul>
+                <li class="toctree-l1"><a class="reference internal" href="../clean-up/">Clean up</a>
+                </li>
+              </ul>
+      </div>
+    </div>
+    </nav>
+
+    <section data-toggle="wy-nav-shift" class="wy-nav-content-wrap">
+      <nav class="wy-nav-top" role="navigation" aria-label="Mobile navigation menu">
+          <i data-toggle="wy-nav-top" class="fa fa-bars"></i>
+          <a href="..">Simple microservices example</a>
+        
+      </nav>
+      <div class="wy-nav-content">
+        <div class="rst-content"><div role="navigation" aria-label="breadcrumbs navigation">
+  <ul class="wy-breadcrumbs">
+    <li><a href=".." class="icon icon-home" alt="Docs"></a> &raquo;</li>
+      <li>Create master app</li>
+    <li class="wy-breadcrumbs-aside">
+    </li>
+  </ul>
+  <hr/>
+</div>
+          <div role="main" class="document" itemscope="itemscope" itemtype="http://schema.org/Article">
+            <div class="section" itemprop="articleBody">
+              
+                <h1 id="create-master-app">Create Master App</h1>
+<p>This is the main application. This will be configured to scale to 2 instances that are load balanced by Nginx. The app supports the following redirections : </p>
+<ul>
+<li><strong>/</strong> : Return simple message on how to use this service
+<img alt="Screenshot" src="../img/master-index.png" /></li>
+<li><strong>/news</strong> : Pass request to news service
+<img alt="Screenshot" src="../img/master-news.png" /></li>
+<li><strong>/weather</strong> : Pass request to weather service
+<img alt="Screenshot" src="../img/master-weather.png" /></li>
+</ul>
+<h2 id="create-master-service">Create master service</h2>
+<p>Create <code>master_assistant.py</code> and copy the following contents.</p>
+<pre><code>from flask import Flask, request
+from flask_restful import Api
+import requests
+
+app = Flask(__name__)
+api = Api(app)
+@app.route('/')
+def index():
+    res=&quot;Access master services as follows: http://localhost/news?country=us or http://localhost/weather?city=chicago&quot;
+    return res
+@app.route('/weather')
+def weather():
+    city = request.args.get('city')
+    if city.isdigit():
+        res = &quot;City name must be string e.g. 'Amsterdam, Berlin'&quot;
+        return res
+    response = requests.get(&quot;http://weather:3002/weather?city=&quot;+ city)
+    return response.json()
+@app.route('/news')
+def news():
+    country_name = request.args.get('country')
+    if country_name.isdigit() or len(country_name) &gt; 2 :
+        resp = &quot;Country name must be string. Choose from below: \n\nThe 2-letter ISO 3166-1 code of the country you want to get headlines for.\nPossible options: ae ar at au be bg br ca ch cn co cu cz de eg fr gb gr hk hu id ie il in it jp kr lt lv ma mx my ng nl no nz ph pl pt ro rs ru sa se sg si sk th tr tw ua us ve za&quot;
+        return resp
+    response = requests.get(&quot;http://news:3003/news?country=&quot;+ country_name)
+    return response.json()
+
+if __name__ == '__main__':
+    app.run(host=&quot;0.0.0.0&quot;,port=3001,debug=True,threaded=True)
+</code></pre>
+<p>The key point to see is that the app runs on port 3001. </p>
+<h2 id="create-dockerfile">Create Dockerfile</h2>
+<p>Since this is the master app, we will use the standard <code>Dockerfile</code>. This will be auto-referenced in the <code>docker-compose.yml</code> file. </p>
+<pre><code># use Python 3.11 image
+FROM python:3.11-alpine
+
+# install dependencies
+COPY requirements.txt .
+RUN pip install -r requirements.txt
+EXPOSE 3001
+COPY master_assistant.py .
+
+# run the application
+CMD [&quot;python&quot;, &quot;master_assistant.py&quot;]
+</code></pre>
+<p>This will tell docker to:</p>
+<ul>
+<li>Use python base image 3.11-alpine </li>
+<li>Reference <code>requirements.txt</code> in the image to install required software </li>
+<li>Expose port 3001</li>
+<li>Copy <code>master_assistant.py</code> to the image</li>
+<li>Start the master service</li>
+</ul>
+              
+            </div>
+          </div><footer>
+    <div class="rst-footer-buttons" role="navigation" aria-label="Footer Navigation">
+        <a href="../create-weather-service/" class="btn btn-neutral float-left" title="Create weather service"><span class="icon icon-circle-arrow-left"></span> Previous</a>
+        <a href="../create-nginx-loadbalancer/" class="btn btn-neutral float-right" title="Create ngix loadbalancer">Next <span class="icon icon-circle-arrow-right"></span></a>
+    </div>
+
+  <hr/>
+
+  <div role="contentinfo">
+    <!-- Copyright etc -->
+  </div>
+
+  Built with <a href="https://www.mkdocs.org/">MkDocs</a> using a <a href="https://github.com/readthedocs/sphinx_rtd_theme">theme</a> provided by <a href="https://readthedocs.org">Read the Docs</a>.
+</footer>
+          
+        </div>
+      </div>
+
+    </section>
+
+  </div>
+
+  <div class="rst-versions" role="note" aria-label="Versions">
+  <span class="rst-current-version" data-toggle="rst-current-version">
+    
+    
+      <span><a href="../create-weather-service/" style="color: #fcfcfc">&laquo; Previous</a></span>
+    
+    
+      <span><a href="../create-nginx-loadbalancer/" style="color: #fcfcfc">Next &raquo;</a></span>
+    
+  </span>
+</div>
+    <script>var base_url = '..';</script>
+    <script src="../js/theme_extra.js" defer></script>
+    <script src="../js/theme.js" defer></script>
+      <script src="../search/main.js" defer></script>
+    <script defer>
+        window.onload = function () {
+            SphinxRtdTheme.Navigation.enable(true);
+        };
+    </script>
+
+</body>
+</html>

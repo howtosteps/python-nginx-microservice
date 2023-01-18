@@ -1,0 +1,199 @@
+<!DOCTYPE html>
+<html class="writer-html5" lang="en" >
+<head>
+    <meta charset="utf-8" />
+    <meta http-equiv="X-UA-Compatible" content="IE=edge" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0" /><link rel="canonical" href="https://howtosteps.github.io/python-nginx-microservice/site/create-nginx-loadbalancer/" />
+      <link rel="shortcut icon" href="../img/favicon.ico" />
+    <title>Create ngix loadbalancer - Simple microservices example</title>
+    <link rel="stylesheet" href="../css/theme.css" />
+    <link rel="stylesheet" href="../css/theme_extra.css" />
+        <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/highlight.js/10.5.0/styles/github.min.css" />
+    
+      <script>
+        // Current page data
+        var mkdocs_page_name = "Create ngix loadbalancer";
+        var mkdocs_page_input_path = "create-nginx-loadbalancer.md";
+        var mkdocs_page_url = "/python-nginx-microservice/site/create-nginx-loadbalancer/";
+      </script>
+    
+    <script src="../js/jquery-3.6.0.min.js" defer></script>
+    <!--[if lt IE 9]>
+      <script src="../js/html5shiv.min.js"></script>
+    <![endif]-->
+      <script src="https://cdnjs.cloudflare.com/ajax/libs/highlight.js/10.5.0/highlight.min.js"></script>
+      <script>hljs.initHighlightingOnLoad();</script> 
+</head>
+
+<body class="wy-body-for-nav" role="document">
+
+  <div class="wy-grid-for-nav">
+    <nav data-toggle="wy-nav-shift" class="wy-nav-side stickynav">
+    <div class="wy-side-scroll">
+      <div class="wy-side-nav-search">
+          <a href=".." class="icon icon-home"> Simple microservices example
+        </a><div role="search">
+  <form id ="rtd-search-form" class="wy-form" action="../search.html" method="get">
+      <input type="text" name="q" placeholder="Search docs" title="Type search term here" />
+  </form>
+</div>
+      </div>
+
+      <div class="wy-menu wy-menu-vertical" data-spy="affix" role="navigation" aria-label="Navigation menu">
+              <ul>
+                <li class="toctree-l1"><a class="reference internal" href="..">Home</a>
+                </li>
+              </ul>
+              <ul>
+                <li class="toctree-l1"><a class="reference internal" href="../create-news-service/">Create news service</a>
+                </li>
+              </ul>
+              <ul>
+                <li class="toctree-l1"><a class="reference internal" href="../create-weather-service/">Create weather service</a>
+                </li>
+              </ul>
+              <ul>
+                <li class="toctree-l1"><a class="reference internal" href="../create-master-app/">Create master app</a>
+                </li>
+              </ul>
+              <ul class="current">
+                <li class="toctree-l1 current"><a class="reference internal current" href="./">Create ngix loadbalancer</a>
+    <ul class="current">
+    <li class="toctree-l2"><a class="reference internal" href="#create-nginxconf">Create nginx.conf</a>
+    </li>
+    <li class="toctree-l2"><a class="reference internal" href="#create-dockerfilenginx">Create Dockerfile.nginx</a>
+    </li>
+    </ul>
+                </li>
+              </ul>
+              <ul>
+                <li class="toctree-l1"><a class="reference internal" href="../create-docker-compose/">Define docker compose</a>
+                </li>
+              </ul>
+              <ul>
+                <li class="toctree-l1"><a class="reference internal" href="../build-and-run-app/">Build and run app</a>
+                </li>
+              </ul>
+              <ul>
+                <li class="toctree-l1"><a class="reference internal" href="../clean-up/">Clean up</a>
+                </li>
+              </ul>
+      </div>
+    </div>
+    </nav>
+
+    <section data-toggle="wy-nav-shift" class="wy-nav-content-wrap">
+      <nav class="wy-nav-top" role="navigation" aria-label="Mobile navigation menu">
+          <i data-toggle="wy-nav-top" class="fa fa-bars"></i>
+          <a href="..">Simple microservices example</a>
+        
+      </nav>
+      <div class="wy-nav-content">
+        <div class="rst-content"><div role="navigation" aria-label="breadcrumbs navigation">
+  <ul class="wy-breadcrumbs">
+    <li><a href=".." class="icon icon-home" alt="Docs"></a> &raquo;</li>
+      <li>Create ngix loadbalancer</li>
+    <li class="wy-breadcrumbs-aside">
+    </li>
+  </ul>
+  <hr/>
+</div>
+          <div role="main" class="document" itemscope="itemscope" itemtype="http://schema.org/Article">
+            <div class="section" itemprop="articleBody">
+              
+                <h1 id="create-nginx-loadbalancer">Create Nginx Loadbalancer</h1>
+<p>The purpose of the Nginx Loadblancer is to accept all requests and load-balance it across 2 instances of the master application. The scaling of the master service will be defined during the container start-up. </p>
+<h2 id="create-nginxconf">Create nginx.conf</h2>
+<p>Load balancing with Nginx uses a round-robin algorithm by default if no other method is defined. With round-robin scheme each server is selected in turns according to the order we set them in the <code>nginx.conf</code> file. This balances the number of requests equally between our to two master instances. </p>
+<p>***Please notice that the master application will have 2 instances and are refernced by their container-names. The container-name is usually :</p>
+<ul>
+<li>[project-directory]-[image-name-from-docker-compose.yml]-[instance-count]</li>
+<li>Project directory from the start page is : <code>python-nginx-microservice</code></li>
+</ul>
+<p>Now create file <code>nginx.conf</code> and copy the following contents :</p>
+<pre><code>events {}
+# Define which servers to include in the load balancing scheme.
+http {
+    upstream app {
+        server master;
+        server python-nginx-microservice-master-1:3001;
+        server python-nginx-microservice-master-2:3001;
+     }
+# This server accepts all traffic to port 80 and passes it to the upstream.
+server {
+         listen 80;
+         server_name app.com;
+
+         location / {
+              proxy_pass http://app;
+          }
+     }
+}
+</code></pre>
+<h2 id="create-dockerfilenginx">Create Dockerfile.nginx</h2>
+<pre><code># using Nginx base image
+FROM nginx
+
+# delete nginx default .conf .file
+RUN rm /etc/nginx/conf.d/default.conf
+
+# add the .conf file we have created
+COPY nginx.conf /etc/nginx/nginx.conf
+
+#start the nginx server
+CMD [&quot;/usr/sbin/nginx&quot;, &quot;-g&quot;, &quot;daemon off;&quot;]
+</code></pre>
+<p>This tells Docker to:</p>
+<ul>
+<li>Build an image starting with the nginx base image</li>
+<li>Remove the old configuration file</li>
+<li>Replace it with the newly updated nginx.conf</li>
+<li>Start the nginx server</li>
+</ul>
+              
+            </div>
+          </div><footer>
+    <div class="rst-footer-buttons" role="navigation" aria-label="Footer Navigation">
+        <a href="../create-master-app/" class="btn btn-neutral float-left" title="Create master app"><span class="icon icon-circle-arrow-left"></span> Previous</a>
+        <a href="../create-docker-compose/" class="btn btn-neutral float-right" title="Define docker compose">Next <span class="icon icon-circle-arrow-right"></span></a>
+    </div>
+
+  <hr/>
+
+  <div role="contentinfo">
+    <!-- Copyright etc -->
+  </div>
+
+  Built with <a href="https://www.mkdocs.org/">MkDocs</a> using a <a href="https://github.com/readthedocs/sphinx_rtd_theme">theme</a> provided by <a href="https://readthedocs.org">Read the Docs</a>.
+</footer>
+          
+        </div>
+      </div>
+
+    </section>
+
+  </div>
+
+  <div class="rst-versions" role="note" aria-label="Versions">
+  <span class="rst-current-version" data-toggle="rst-current-version">
+    
+    
+      <span><a href="../create-master-app/" style="color: #fcfcfc">&laquo; Previous</a></span>
+    
+    
+      <span><a href="../create-docker-compose/" style="color: #fcfcfc">Next &raquo;</a></span>
+    
+  </span>
+</div>
+    <script>var base_url = '..';</script>
+    <script src="../js/theme_extra.js" defer></script>
+    <script src="../js/theme.js" defer></script>
+      <script src="../search/main.js" defer></script>
+    <script defer>
+        window.onload = function () {
+            SphinxRtdTheme.Navigation.enable(true);
+        };
+    </script>
+
+</body>
+</html>

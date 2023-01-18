@@ -1,5 +1,12 @@
-site_name: My Docs
+site_name: Simple microservices example
 site_url: https://howtosteps.github.io/python-nginx-microservice/site/
 nav:
   - Home: index.md
+  - Create news service: create-news-service.md
+  - Create weather service: create-weather-service.md
+  - Create master app: create-master-app.md
+  - Create ngix loadbalancer: create-nginx-loadbalancer.md
+  - Define docker compose: create-docker-compose.md
+  - Build and run app : build-and-run-app.md
+  - Clean up : clean-up.md
 theme: readthedocs
