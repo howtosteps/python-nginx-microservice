@@ -2,11 +2,13 @@
 Now we will create the weather service app. The news service app is also based of Flask API and simply calls the  [WeatherAPI](https://openweathermap.org/api). The weather service app will be configured on port:3002 
 
 ## Sample request/response
-A request involves 2 attributes :
-* appid : This is the 2 letter code for the country
-* q : Represents the city name
+A request involves 2 attributes:
+
+* ***appid*** : This is the 2 letter code for the country
+* ***q*** : Represents the city name
 
 Sample request/response will look like this:
+
 * Sample request for the weather in New York city
 ```
 PS C:\Users\aniru\workspace\github\nginx-docker> curl https://api.openweathermap.org/data/2.5/weather?appid=deb96cff96df7c74e93e62661b91c3c2'&'q=new%20york

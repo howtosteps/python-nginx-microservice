@@ -106,11 +106,15 @@
                 <h1 id="create-weather-service">Create Weather Service</h1>
 <p>Now we will create the weather service app. The news service app is also based of Flask API and simply calls the  <a href="https://openweathermap.org/api">WeatherAPI</a>. The weather service app will be configured on port:3002 </p>
 <h2 id="sample-requestresponse">Sample request/response</h2>
-<p>A request involves 2 attributes :
-* appid : This is the 2 letter code for the country
-* q : Represents the city name</p>
-<p>Sample request/response will look like this:
-* Sample request for the weather in New York city</p>
+<p>A request involves 2 attributes:</p>
+<ul>
+<li><strong><em>appid</em></strong> : This is the 2 letter code for the country</li>
+<li><strong><em>q</em></strong> : Represents the city name</li>
+</ul>
+<p>Sample request/response will look like this:</p>
+<ul>
+<li>Sample request for the weather in New York city</li>
+</ul>
 <pre><code>PS C:\Users\aniru\workspace\github\nginx-docker&gt; curl https://api.openweathermap.org/data/2.5/weather?appid=deb96cff96df7c74e93e62661b91c3c2'&amp;'q=new%20york
 </code></pre>
 <ul>

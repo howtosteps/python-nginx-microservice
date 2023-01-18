@@ -3,8 +3,9 @@ In this section, we create our first news service app. The news service app is b
 
 ## Sample request/response
 A request involves 2 attributes:
-* country : This is the 2 letter code for the country
-* API key : This can be generated from the website. I am using the original author's 
+
+* ***country*** : This is the 2 letter code for the country
+* ***API key*** : This can be generated from the website. I am using the original author's 
 
 A sample request/response will look like this : 
 
